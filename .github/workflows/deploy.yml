@@ -6,16 +6,10 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
+  contents: write
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,21 +33,14 @@ jobs:
         run: |
           echo "=== dist/ contents ==="
           ls -la dist/
-          echo "=== dist/assets/ contents ==="
-          ls -la dist/assets/ || echo "No assets directory"
-          echo "=== dist/index.html head ==="
-          head -15 dist/index.html
+          echo "=== dist/assets/ ==="
+          ls -la dist/assets/ 2>/dev/null || echo "No assets directory!"
+          echo "=== dist/index.html first 10 lines ==="
+          head -10 dist/index.html
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Deploy to gh-pages branch
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/deploy-pages@v4
-        id: deployment
+          folder: dist
+          branch: gh-pages
+          clean: true
