@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "sequencer",
+      "runtimeExecutable": "C:\\Users\\isobe\\Desktop\\Claude\\html5-music\\dev.cmd",
+      "runtimeArgs": [],
+      "port": 3000
+    },
+    {
+      "name": "preview",
+      "runtimeExecutable": "C:\\Users\\isobe\\Desktop\\Claude\\html5-music\\preview.cmd",
+      "runtimeArgs": [],
+      "port": 4174
+    }
+  ]
+}
