@@ -5,10 +5,10 @@ import { applyDrumPreset, randomizeDrums, applyPianoPreset } from './sequencer/p
 import { buildDrumSequencer, updateDrumPlayhead } from './ui/drumSequencer';
 import { initPianoRoll, resize as prResize, draw as prDraw } from './ui/pianoRoll';
 import { initTransportBar, initSynthControls, refreshSynthControls } from './ui/transportBar';
+import { buildPatternBar } from './ui/patternBar';
 import { buildNoteList } from './notes';
 import { loadFromStorage, scheduleAutoSave } from './project/io';
 
-// Suppress unused import warning
 void noteList;
 
 // ── Tab switching ──
@@ -53,7 +53,7 @@ function clearAll(): void {
   scheduleAutoSave();
 }
 
-// ── Sync DOM controls to current state (called after load/import) ──
+// ── Sync DOM controls to current state ──
 function refreshDOMControls(): void {
   (document.getElementById('bpm-range') as HTMLInputElement).value = String(seqState.bpm);
   document.getElementById('bpm-val')!.textContent = String(seqState.bpm);
@@ -62,7 +62,7 @@ function refreshDOMControls(): void {
   refreshSynthControls();
 }
 
-// ── Full UI rebuild (called after import) ──
+// ── Full UI rebuild (after pattern switch or import) ──
 function refreshAllUI(): void {
   refreshDOMControls();
   buildDrumSequencer(document.getElementById('drum-seq')!);
@@ -71,8 +71,13 @@ function refreshAllUI(): void {
 
 // ── Wire up DOM ──
 document.addEventListener('DOMContentLoaded', () => {
-  initTransportBar(refreshAllUI);
+  initTransportBar(onImport);
   initSynthControls();
+
+  function onImport(): void {
+    buildPatternBar(document.getElementById('pattern-bar')!, refreshAllUI);
+    refreshAllUI();
+  }
 
   // Tabs
   document.querySelector<HTMLElement>('[data-tab="drums"]')!.addEventListener('click', () => switchTab('drums'));
@@ -94,8 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Drum presets
   document.querySelectorAll<HTMLElement>('[data-drum-preset]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const name = btn.dataset['drumPreset']!;
-      applyDrumPreset(name);
+      applyDrumPreset(btn.dataset['drumPreset']!);
       buildDrumSequencer(document.getElementById('drum-seq')!);
       scheduleAutoSave();
     });
@@ -130,4 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     applyDrumPreset('basic');
     buildDrumSequencer(document.getElementById('drum-seq')!);
   }
+
+  // Init pattern bar (after load so patterns are populated)
+  buildPatternBar(document.getElementById('pattern-bar')!, refreshAllUI);
 });

@@ -1,8 +1,8 @@
-import { seqState, drumPat, pianoNotes, setPianoNotes, synthParams, CHANNELS } from '../sequencer/state';
+import { seqState } from '../sequencer/state';
+import { getAll, currentId, snapshotCurrent, loadFromData } from './patterns';
 import type { ProjectData } from './schema';
 
 const STORAGE_KEY = 'sequencer_project';
-const CURRENT_PATTERN_ID = 'p1';
 
 let _saveTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -23,36 +23,22 @@ function _flashSaved(): void {
 }
 
 export function serializeProject(): ProjectData {
+  snapshotCurrent();
+  const patterns = getAll();
   return {
     version: 1,
     bpm: seqState.bpm,
     swing: seqState.swing,
-    patterns: [{
-      id: CURRENT_PATTERN_ID,
-      name: 'Pattern 1',
-      steps: seqState.steps,
-      drums: Object.fromEntries(CHANNELS.map(ch => [ch.id, Array.from(drumPat[ch.id])])),
-      piano: pianoNotes.map(s => Array.from(s)),
-      synth: { ...synthParams },
-    }],
-    arrangement: [CURRENT_PATTERN_ID],
-    currentPatternId: CURRENT_PATTERN_ID,
+    patterns,
+    arrangement: patterns.map(p => p.id),
+    currentPatternId: currentId,
   };
 }
 
 export function deserializeProject(data: ProjectData): void {
   seqState.bpm = data.bpm;
   seqState.swing = data.swing;
-  const pat = data.patterns.find(p => p.id === data.currentPatternId) ?? data.patterns[0];
-  if (!pat) return;
-  seqState.steps = pat.steps;
-  CHANNELS.forEach(ch => {
-    drumPat[ch.id] = new Uint8Array(pat.steps);
-    const saved = pat.drums[ch.id];
-    if (saved) drumPat[ch.id].set(saved.slice(0, pat.steps));
-  });
-  setPianoNotes(pat.piano.map(arr => new Set<number>(arr)));
-  Object.assign(synthParams, pat.synth);
+  loadFromData(data.patterns, data.currentPatternId);
 }
 
 export function saveToStorage(): void {
