@@ -5,7 +5,7 @@ export function getCtx(): AudioContext {
   if (!ctx) {
     ctx = new AudioContext();
     master = ctx.createGain();
-    master.gain.value = 0.7;
+    master.gain.value = 0.35;
     master.connect(ctx.destination);
   }
   if (ctx.state === 'suspended') ctx.resume();

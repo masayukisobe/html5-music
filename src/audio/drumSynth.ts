@@ -11,8 +11,17 @@ function noise(ctx: AudioContext, dur: number): AudioBufferSourceNode {
   return src;
 }
 
-function playKick(t: number): void {
-  const ctx = getCtx(); const m = getMaster();
+function trackOut(gainMult: number): AudioNode {
+  if (gainMult === 1) return getMaster();
+  const ctx = getCtx();
+  const g = ctx.createGain();
+  g.gain.value = gainMult;
+  g.connect(getMaster());
+  return g;
+}
+
+function playKick(t: number, m: AudioNode): void {
+  const ctx = getCtx();
   const o = ctx.createOscillator(); const g = ctx.createGain();
   o.connect(g); g.connect(m);
   o.type = 'sine';
@@ -23,8 +32,8 @@ function playKick(t: number): void {
   o.start(t); o.stop(t + 0.52);
 }
 
-function playSnare(t: number): void {
-  const ctx = getCtx(); const m = getMaster();
+function playSnare(t: number, m: AudioNode): void {
+  const ctx = getCtx();
   const n = noise(ctx, 0.25); const ng = ctx.createGain(); const nf = ctx.createBiquadFilter();
   nf.type = 'highpass'; nf.frequency.value = 1000;
   n.connect(nf); nf.connect(ng); ng.connect(m);
@@ -37,8 +46,8 @@ function playSnare(t: number): void {
   o.start(t); o.stop(t + 0.15);
 }
 
-function playHihatC(t: number): void {
-  const ctx = getCtx(); const m = getMaster();
+function playHihatC(t: number, m: AudioNode): void {
+  const ctx = getCtx();
   const n = noise(ctx, 0.1); const g = ctx.createGain(); const f = ctx.createBiquadFilter();
   f.type = 'highpass'; f.frequency.value = 8000;
   n.connect(f); f.connect(g); g.connect(m);
@@ -46,8 +55,8 @@ function playHihatC(t: number): void {
   n.start(t); n.stop(t + 0.1);
 }
 
-function playHihatO(t: number): void {
-  const ctx = getCtx(); const m = getMaster();
+function playHihatO(t: number, m: AudioNode): void {
+  const ctx = getCtx();
   const n = noise(ctx, 0.4); const g = ctx.createGain(); const f = ctx.createBiquadFilter();
   f.type = 'highpass'; f.frequency.value = 7000;
   n.connect(f); f.connect(g); g.connect(m);
@@ -55,8 +64,8 @@ function playHihatO(t: number): void {
   n.start(t); n.stop(t + 0.4);
 }
 
-function playClap(t: number): void {
-  const ctx = getCtx(); const m = getMaster();
+function playClap(t: number, m: AudioNode): void {
+  const ctx = getCtx();
   [0, 0.01, 0.02].forEach(offset => {
     const n = noise(ctx, 0.15); const g = ctx.createGain(); const f = ctx.createBiquadFilter();
     f.type = 'bandpass'; f.frequency.value = 1100; f.Q.value = 0.4;
@@ -67,8 +76,8 @@ function playClap(t: number): void {
   });
 }
 
-function playTom(t: number, hi: boolean): void {
-  const ctx = getCtx(); const m = getMaster();
+function playTom(t: number, m: AudioNode, hi: boolean): void {
+  const ctx = getCtx();
   const o = ctx.createOscillator(); const g = ctx.createGain();
   o.connect(g); g.connect(m); o.type = 'sine';
   const freq = hi ? 260 : 130; const dur = hi ? 0.35 : 0.45;
@@ -77,8 +86,8 @@ function playTom(t: number, hi: boolean): void {
   o.start(t); o.stop(t + dur + 0.02);
 }
 
-function playBass(t: number): void {
-  const ctx = getCtx(); const m = getMaster();
+function playBass(t: number, m: AudioNode): void {
+  const ctx = getCtx();
   const o = ctx.createOscillator(); const g = ctx.createGain(); const f = ctx.createBiquadFilter();
   f.type = 'lowpass'; f.frequency.value = 300;
   o.connect(f); f.connect(g); g.connect(m);
@@ -87,21 +96,23 @@ function playBass(t: number): void {
   o.start(t); o.stop(t + 0.35);
 }
 
-export function playDrum(id: string, t: number): void {
+export function playDrum(id: string, t: number, gainMult = 1): void {
+  if (gainMult === 0) return;
+  const m = trackOut(gainMult);
   if (drumSamples[id]) {
     const ctx = getCtx(); const src = ctx.createBufferSource();
-    src.buffer = drumSamples[id]; src.connect(getMaster()); src.start(t);
+    src.buffer = drumSamples[id]; src.connect(m); src.start(t);
     return;
   }
   switch (id) {
-    case 'kick':    playKick(t); break;
-    case 'snare':   playSnare(t); break;
-    case 'hihat_c': playHihatC(t); break;
-    case 'hihat_o': playHihatO(t); break;
-    case 'clap':    playClap(t); break;
-    case 'tom_h':   playTom(t, true); break;
-    case 'tom_l':   playTom(t, false); break;
-    case 'bass':    playBass(t); break;
+    case 'kick':    playKick(t, m); break;
+    case 'snare':   playSnare(t, m); break;
+    case 'hihat_c': playHihatC(t, m); break;
+    case 'hihat_o': playHihatO(t, m); break;
+    case 'clap':    playClap(t, m); break;
+    case 'tom_h':   playTom(t, m, true); break;
+    case 'tom_l':   playTom(t, m, false); break;
+    case 'bass':    playBass(t, m); break;
   }
 }
 

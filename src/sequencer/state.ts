@@ -40,6 +40,15 @@ CHANNELS.forEach(ch => { drumPat[ch.id] = new Uint8Array(seqState.steps); });
 export let pianoNotes: Set<number>[] = Array.from({ length: seqState.steps }, () => new Set<number>());
 export function setPianoNotes(p: Set<number>[]): void { pianoNotes = p; }
 
+export let pianoNoteDurs: Map<string, number> = new Map();
+export function setPianoNoteDurs(m: Map<string, number>): void { pianoNoteDurs = m; }
+export function getNoteDur(step: number, midi: number): number { return pianoNoteDurs.get(`${step}_${midi}`) ?? 1; }
+export function setNoteDur(step: number, midi: number, dur: number): void {
+  if (dur <= 1) pianoNoteDurs.delete(`${step}_${midi}`);
+  else pianoNoteDurs.set(`${step}_${midi}`, dur);
+}
+export function deleteNoteDur(step: number, midi: number): void { pianoNoteDurs.delete(`${step}_${midi}`); }
+
 export let noteList: Note[] = buildNoteList(2);
 export function setNoteList(nl: Note[]): void { noteList = nl; }
 
@@ -64,5 +73,8 @@ export function resizePianoNotes(newSteps: number): void {
     pianoNotes = [...old, ...Array.from({ length: newSteps - old.length }, () => new Set<number>())];
   } else {
     pianoNotes = old.slice(0, newSteps);
+    for (const key of [...pianoNoteDurs.keys()]) {
+      if (parseInt(key.split('_')[0]) >= newSteps) pianoNoteDurs.delete(key);
+    }
   }
 }

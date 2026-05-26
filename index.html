@@ -12,7 +12,7 @@
   <div class="t-group">
     <button class="btn" id="btn-play">▶ PLAY</button>
     <button class="btn" id="btn-stop">■ STOP</button>
-    <button class="btn danger" id="btn-clear">✕ ALL CLEAR</button>
+    <button class="btn danger" id="btn-clear">✕ CLEAR</button>
   </div>
   <div class="t-group">
     <span class="t-label">BPM</span>
@@ -21,7 +21,7 @@
   </div>
   <div class="t-group">
     <span class="t-label">VOL</span>
-    <input type="range" id="vol-range" min="0" max="100" value="70" style="width:70px">
+    <input type="range" id="vol-range" min="0" max="100" value="35" style="width:70px">
   </div>
   <div class="t-group">
     <span class="t-label">SWING</span>
@@ -36,113 +36,116 @@
   <span id="step-indicator">STEP 1 / 16</span>
 </div>
 
-<!-- Pattern Bar -->
-<div id="pattern-bar"></div>
+<!-- Workspace -->
+<div id="workspace">
+  <!-- Track list (left rail) -->
+  <div id="track-list"></div>
 
-<!-- Tabs -->
-<div id="tabs">
-  <div class="tab active" data-tab="drums">🥁 Drums</div>
-  <div class="tab" data-tab="piano">🎹 Piano Roll</div>
-</div>
+  <!-- Editor panel (right) -->
+  <div id="editor-panel">
+    <!-- Clip bar -->
+    <div id="clip-bar"></div>
 
-<!-- Main -->
-<div id="main">
-  <!-- Drum Panel -->
-  <div class="panel active" id="panel-drums">
-    <div class="toolbar">
-      <span class="toolbar-label">Preset</span>
-      <button class="btn" data-drum-preset="basic">Basic</button>
-      <button class="btn" data-drum-preset="hiphop">Hip-Hop</button>
-      <button class="btn" data-drum-preset="techno">Techno</button>
-      <button class="btn" data-drum-preset="reggae">Reggae</button>
-      <div class="sep"></div>
-      <button class="btn" id="btn-random">🎲 Random</button>
-      <div class="sep"></div>
-      <span class="toolbar-label">Steps</span>
-      <select id="steps-sel">
-        <option value="8">8</option>
-        <option value="16" selected>16</option>
-        <option value="32">32</option>
-      </select>
-    </div>
-    <div id="drum-seq"></div>
-  </div>
+    <!-- Main content -->
+    <div id="main">
+      <!-- Drum Panel -->
+      <div class="panel active" id="panel-drums">
+        <div class="toolbar">
+          <span class="toolbar-label">Preset</span>
+          <button class="btn" data-drum-preset="basic">Basic</button>
+          <button class="btn" data-drum-preset="hiphop">Hip-Hop</button>
+          <button class="btn" data-drum-preset="techno">Techno</button>
+          <button class="btn" data-drum-preset="reggae">Reggae</button>
+          <div class="sep"></div>
+          <button class="btn" id="btn-random">🎲 Random</button>
+          <div class="sep"></div>
+          <span class="toolbar-label">Steps</span>
+          <select id="steps-sel">
+            <option value="8">8</option>
+            <option value="16" selected>16</option>
+            <option value="32">32</option>
+          </select>
+        </div>
+        <div id="drum-seq"></div>
+      </div>
 
-  <!-- Piano Roll Panel -->
-  <div class="panel" id="panel-piano">
-    <div class="toolbar">
-      <span class="toolbar-label">Preset</span>
-      <button class="btn" data-piano-preset="melody1">Melody 1</button>
-      <button class="btn" data-piano-preset="arpeggio">Arpeggio</button>
-      <button class="btn" data-piano-preset="blues">Blues</button>
-      <div class="sep"></div>
-      <button class="btn" id="btn-piano-clear">✕ Clear</button>
-      <div class="sep"></div>
-      <span class="toolbar-label">Octaves</span>
-      <select id="octave-sel">
-        <option value="1">1</option>
-        <option value="2" selected>2</option>
-        <option value="3">3</option>
-      </select>
-    </div>
-    <div id="pr-container">
-      <canvas id="pr-canvas"></canvas>
-    </div>
-    <!-- Synth Controls -->
-    <div id="synth-panel">
-      <span style="font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:1px">Synth</span>
-      <div class="sp-group">
-        <span class="sp-label">Waveform</span>
-        <select id="osc-type">
-          <option value="sawtooth">Saw</option>
-          <option value="square">Square</option>
-          <option value="sine">Sine</option>
-          <option value="triangle">Triangle</option>
-        </select>
-      </div>
-      <div class="sp-group">
-        <span class="sp-label">ATTACK</span>
-        <input type="range" min="1" max="200" value="5" data-synth="attack" data-unit="ms">
-        <span class="sp-val">5ms</span>
-      </div>
-      <div class="sp-group">
-        <span class="sp-label">DECAY</span>
-        <input type="range" min="5" max="500" value="80" data-synth="decay" data-unit="ms">
-        <span class="sp-val">80ms</span>
-      </div>
-      <div class="sp-group">
-        <span class="sp-label">SUSTAIN</span>
-        <input type="range" min="0" max="100" value="60" data-synth="sustain" data-unit="%">
-        <span class="sp-val">60%</span>
-      </div>
-      <div class="sp-group">
-        <span class="sp-label">RELEASE</span>
-        <input type="range" min="10" max="2000" value="200" data-synth="release" data-unit="ms">
-        <span class="sp-val">200ms</span>
-      </div>
-      <div class="sp-group">
-        <span class="sp-label">DETUNE</span>
-        <input type="range" min="-50" max="50" value="0" data-synth="detune" data-unit="ct">
-        <span class="sp-val">0ct</span>
-      </div>
-      <div class="sp-group">
-        <span class="sp-label">OCT SHIFT</span>
-        <select id="oct-shift-sel">
-          <option value="-1">-1</option>
-          <option value="0" selected>0</option>
-          <option value="1">+1</option>
-          <option value="2">+2</option>
-        </select>
-      </div>
-      <div class="sep" style="height:40px"></div>
-      <div class="sp-group" style="align-items:flex-start">
-        <span class="sp-label">WAV Sample</span>
-        <input type="file" id="piano-file" accept=".wav,.mp3,.ogg,.flac" style="display:none">
-        <button class="btn" style="font-size:10px;padding:4px 10px" id="btn-load-piano-wav">📂 Load WAV</button>
-        <span id="piano-sample-name" style="font-size:10px;color:#58a6ff"></span>
-        <label style="font-size:10px;color:#8b949e;cursor:pointer;margin-top:2px">
-          <input type="checkbox" id="use-sample"> Use Sample
-        </label>
+      <!-- Piano Roll Panel -->
+      <div class="panel" id="panel-piano">
+        <div class="toolbar">
+          <span class="toolbar-label">Preset</span>
+          <button class="btn" data-piano-preset="melody1">Melody 1</button>
+          <button class="btn" data-piano-preset="arpeggio">Arpeggio</button>
+          <button class="btn" data-piano-preset="blues">Blues</button>
+          <div class="sep"></div>
+          <button class="btn" id="btn-piano-clear">✕ Clear</button>
+          <div class="sep"></div>
+          <span class="toolbar-label">Octaves</span>
+          <select id="octave-sel">
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+          </select>
+        </div>
+        <div id="pr-container">
+          <canvas id="pr-canvas"></canvas>
+        </div>
+        <!-- Synth Controls -->
+        <div id="synth-panel">
+          <span style="font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:1px">Synth</span>
+          <div class="sp-group">
+            <span class="sp-label">Waveform</span>
+            <select id="osc-type">
+              <option value="sawtooth">Saw</option>
+              <option value="square">Square</option>
+              <option value="sine">Sine</option>
+              <option value="triangle">Triangle</option>
+            </select>
+          </div>
+          <div class="sp-group">
+            <span class="sp-label">ATTACK</span>
+            <input type="range" min="1" max="200" value="5" data-synth="attack" data-unit="ms">
+            <span class="sp-val">5ms</span>
+          </div>
+          <div class="sp-group">
+            <span class="sp-label">DECAY</span>
+            <input type="range" min="5" max="500" value="80" data-synth="decay" data-unit="ms">
+            <span class="sp-val">80ms</span>
+          </div>
+          <div class="sp-group">
+            <span class="sp-label">SUSTAIN</span>
+            <input type="range" min="0" max="100" value="60" data-synth="sustain" data-unit="%">
+            <span class="sp-val">60%</span>
+          </div>
+          <div class="sp-group">
+            <span class="sp-label">RELEASE</span>
+            <input type="range" min="10" max="2000" value="200" data-synth="release" data-unit="ms">
+            <span class="sp-val">200ms</span>
+          </div>
+          <div class="sp-group">
+            <span class="sp-label">DETUNE</span>
+            <input type="range" min="-50" max="50" value="0" data-synth="detune" data-unit="ct">
+            <span class="sp-val">0ct</span>
+          </div>
+          <div class="sp-group">
+            <span class="sp-label">OCT SHIFT</span>
+            <select id="oct-shift-sel">
+              <option value="-1">-1</option>
+              <option value="0" selected>0</option>
+              <option value="1">+1</option>
+              <option value="2">+2</option>
+            </select>
+          </div>
+          <div class="sep" style="height:40px"></div>
+          <div class="sp-group" style="align-items:flex-start">
+            <span class="sp-label">WAV Sample</span>
+            <input type="file" id="piano-file" accept=".wav,.mp3,.ogg,.flac" style="display:none">
+            <button class="btn" style="font-size:10px;padding:4px 10px" id="btn-load-piano-wav">📂 Load WAV</button>
+            <span id="piano-sample-name" style="font-size:10px;color:#58a6ff"></span>
+            <label style="font-size:10px;color:#8b949e;cursor:pointer;margin-top:2px">
+              <input type="checkbox" id="use-sample"> Use Sample
+            </label>
+          </div>
+        </div>
       </div>
     </div>
   </div>
