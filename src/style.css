@@ -14,6 +14,8 @@ body{background:#0d1117;color:#e6edf3;font-family:'Courier New',monospace;min-he
 .bpm-val{font-size:22px;color:#58a6ff;min-width:46px;text-align:center;line-height:1}
 input[type=range]{accent-color:#58a6ff;cursor:pointer}
 #step-indicator{font-size:11px;color:#484f58;margin-left:auto;font-variant-numeric:tabular-nums;flex-shrink:0}
+#autosave-indicator{font-size:10px;color:#3fb950;opacity:0;transition:opacity 0.4s;flex-shrink:0;pointer-events:none}
+#autosave-indicator.visible{opacity:1}
 
 /* ── Tabs ── */
 #tabs{display:flex;background:#161b22;border-bottom:1px solid #21262d;padding:0 16px}

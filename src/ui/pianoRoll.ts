@@ -1,6 +1,7 @@
 import { noteList, pianoNotes, seqState, synthParams } from '../sequencer/state';
 import { playNote } from '../audio/pianoSynth';
 import { getCtx } from '../audio/context';
+import { scheduleAutoSave } from '../project/io';
 
 const KEY_W = 58, CELL_W = 36, CELL_H = 20, NUM_H = 18;
 let canvas: HTMLCanvasElement | null = null;
@@ -97,6 +98,7 @@ function interact(e: MouseEvent, isDown: boolean): void {
       if (isDown) { const ctx = getCtx(); playNote(midi, ctx.currentTime, 0.2, synthParams); }
     }
   } else { pianoNotes[s].delete(midi); }
+  scheduleAutoSave();
   draw();
 }
 

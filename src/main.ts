@@ -4,10 +4,11 @@ import { onStep } from './sequencer/transport';
 import { applyDrumPreset, randomizeDrums, applyPianoPreset } from './sequencer/presets';
 import { buildDrumSequencer, updateDrumPlayhead } from './ui/drumSequencer';
 import { initPianoRoll, resize as prResize, draw as prDraw } from './ui/pianoRoll';
-import { initTransportBar, initSynthControls } from './ui/transportBar';
+import { initTransportBar, initSynthControls, refreshSynthControls } from './ui/transportBar';
 import { buildNoteList } from './notes';
+import { loadFromStorage, scheduleAutoSave } from './project/io';
 
-// Suppress unused import warning - noteList and CHANNELS are used below
+// Suppress unused import warning
 void noteList;
 
 // ── Tab switching ──
@@ -26,6 +27,7 @@ function setSteps(n: number): void {
   resizePianoNotes(n);
   buildDrumSequencer(document.getElementById('drum-seq')!);
   prResize(); prDraw();
+  scheduleAutoSave();
 }
 
 // ── Octaves ──
@@ -48,11 +50,28 @@ function clearAll(): void {
   pianoNotes.forEach(s => s.clear());
   buildDrumSequencer(document.getElementById('drum-seq')!);
   prDraw();
+  scheduleAutoSave();
+}
+
+// ── Sync DOM controls to current state (called after load/import) ──
+function refreshDOMControls(): void {
+  (document.getElementById('bpm-range') as HTMLInputElement).value = String(seqState.bpm);
+  document.getElementById('bpm-val')!.textContent = String(seqState.bpm);
+  (document.getElementById('swing-range') as HTMLInputElement).value = String(seqState.swing);
+  (document.getElementById('steps-sel') as HTMLSelectElement).value = String(seqState.steps);
+  refreshSynthControls();
+}
+
+// ── Full UI rebuild (called after import) ──
+function refreshAllUI(): void {
+  refreshDOMControls();
+  buildDrumSequencer(document.getElementById('drum-seq')!);
+  prResize(); prDraw();
 }
 
 // ── Wire up DOM ──
 document.addEventListener('DOMContentLoaded', () => {
-  initTransportBar();
+  initTransportBar(refreshAllUI);
   initSynthControls();
 
   // Tabs
@@ -78,11 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const name = btn.dataset['drumPreset']!;
       applyDrumPreset(name);
       buildDrumSequencer(document.getElementById('drum-seq')!);
+      scheduleAutoSave();
     });
   });
   document.getElementById('btn-random')!.addEventListener('click', () => {
     randomizeDrums();
     buildDrumSequencer(document.getElementById('drum-seq')!);
+    scheduleAutoSave();
   });
 
   // Piano presets
@@ -90,16 +111,23 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       applyPianoPreset(btn.dataset['pianoPreset']!);
       prDraw();
+      scheduleAutoSave();
     });
   });
   document.getElementById('btn-piano-clear')!.addEventListener('click', () => {
     pianoNotes.forEach(s => s.clear()); prDraw();
+    scheduleAutoSave();
   });
 
   // Init piano roll canvas
   initPianoRoll(document.getElementById('pr-canvas') as HTMLCanvasElement);
 
-  // Init drum sequencer
-  applyDrumPreset('basic');
-  buildDrumSequencer(document.getElementById('drum-seq')!);
+  // Load from storage or apply defaults
+  if (loadFromStorage()) {
+    refreshDOMControls();
+    buildDrumSequencer(document.getElementById('drum-seq')!);
+  } else {
+    applyDrumPreset('basic');
+    buildDrumSequencer(document.getElementById('drum-seq')!);
+  }
 });

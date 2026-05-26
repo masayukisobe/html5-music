@@ -1,6 +1,7 @@
 import { CHANNELS, drumPat, seqState } from '../sequencer/state';
 import { playDrum, loadDrumSample, hasDrumSample } from '../audio/drumSynth';
 import { getCtx } from '../audio/context';
+import { scheduleAutoSave } from '../project/io';
 
 export function buildDrumSequencer(container: HTMLElement): void {
   container.innerHTML = '';
@@ -61,6 +62,7 @@ export function buildDrumSequencer(container: HTMLElement): void {
           btn.style.background = on ? ch.color : '';
           btn.style.boxShadow = on ? `0 0 8px ${ch.color}80` : '';
           if (on) playDrum(ch.id, getCtx().currentTime + 0.01);
+          scheduleAutoSave();
         });
         beatGrp.appendChild(btn);
       }
@@ -83,6 +85,7 @@ export function buildDrumSequencer(container: HTMLElement): void {
       beatsWrap.querySelectorAll<HTMLElement>('.step-btn').forEach(b => {
         b.classList.remove('on'); b.style.background = ''; b.style.boxShadow = '';
       });
+      scheduleAutoSave();
     });
     ctrl.appendChild(clrBtn);
 
